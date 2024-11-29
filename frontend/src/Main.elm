@@ -92,13 +92,20 @@ update msg model =
    (Chose shape) -> ({initialModel | playingAs = Just shape}, Cmd.none)
    (ClickedMe t) -> case model.playingAs of 
                      Nothing -> (model,Cmd.none)
-                     (Just s) -> let newBoard = updateBoard s t model.myBoard 
-                                 in ({model | myBoard = newBoard}
-                                    ,generate NPCChoice (uniformRowPicker newBoard)
-                                    )
+                     (Just s) -> if (List.member t (Array.toList <| getAvailableSpots model.myBoard))
+                                 then let newBoard = updateBoard s t model.myBoard 
+                                          nextCmd  = case evalBoard newBoard of 
+                                           Nothing -> generate NPCChoice (uniformRowPicker newBoard)
+                                           Just _  -> Cmd.none
+                                      in ({model | myBoard = newBoard}, nextCmd)
+                                 else (model,Cmd.none)
    (NPCChoice t) -> case model.playingAs of 
-                     Nothing  -> (model,Cmd.none)
-                     (Just s) -> ({model | myBoard = updateBoard (notShape s) t model.myBoard}, Cmd.none)
+                     Nothing -> (model, Cmd.none)
+                     (Just s) -> 
+                        if List.member t (Array.toList <| getAvailableSpots model.myBoard)
+                        then let newBoard = updateBoard (notShape s) t model.myBoard
+                             in ({model | myBoard = newBoard}, Cmd.none)
+                        else (model, Cmd.none)
    (NewGame) -> (initialModel , Cmd.none)
                        
 ---- 
@@ -149,23 +156,49 @@ evalBoard board = asum [evalRows board, evalColumns board, evalDiag board]
 -------------------------------------
 
 
-    
-getAvailableSpots : Board -> List (Int,Int)
+ {-  
+getAvailableSpots : Board -> Array (Int,Int)
 getAvailableSpots board = 
-        let rowOneSpots  = loopingFunction 1 0 board.rowOne 
-            rowTwoSpots  = loopingFunction 2 0 board.rowTwo 
+        let rowOneSpots   = loopingFunction 1 0 board.rowOne 
+            rowTwoSpots   = loopingFunction 2 0 board.rowTwo 
             rowThreeSpots = loopingFunction 3 0 board.rowThree 
-        in rowOneSpots ++ rowTwoSpots ++ rowThreeSpots
-loopingFunction : Int -> Int -> Array String -> List (Int,Int)
+            myLog         = Debug.log "avaialable spots" (getAvailableSpots board)
+        in Array.append (Array.append (rowOneSpots )( rowTwoSpots)) rowThreeSpots
+loopingFunction : Int -> Int -> Array String -> Array (Int,Int)
 loopingFunction i acc array = 
-       case Array.toList array of 
-        [] -> [] 
-        (s :: ss) -> case s of 
-                      "" -> (i, 1 + acc) :: (loopingFunction i (acc + 1) (Array.fromList ss))
-                      _  -> loopingFunction i (acc + 1) (Array.fromList ss)
+       case Array.isEmpty array of 
+        True  -> Array.empty 
+        False -> case Array.get acc array of 
+                  Nothing   -> Array.empty
+                  (Just "") -> 
+                     Array.append 
+                     (Array.initialize 1 (\_ -> (i, acc + 1))) 
+                     (loopingFunction i (acc + 1) (Array.slice (1) (-1) array))
+                  (Just _) -> loopingFunction i (acc + 1) (Array.slice (1) (-1) array)
+-} 
+-- This was my code above, and I got angry so I asked the AI to fix it. 
+-- So this is what the ai did. 
+getAvailableSpots : Board -> Array (Int,Int)
+getAvailableSpots board = 
+    let 
+        rowOneSpots   =   
+           (List.map Tuple.first) (List.filter (\t -> (Tuple.second t ) == "") (Array.toIndexedList board.rowOne ))
+        rowTwoSpots   =   
+           (List.map Tuple.first) (List.filter (\t -> (Tuple.second t ) == "") (Array.toIndexedList board.rowTwo ))
+        rowThreeSpots =   
+          (List.map Tuple.first) (List.filter (\t -> (Tuple.second t ) == "") (Array.toIndexedList board.rowThree))
+        rowOneArray   = List.map (\i -> (1,i + 1)) rowOneSpots
+        rowTwoArray   = List.map (\i -> (2,i + 1)) rowTwoSpots
+        rowThreeArray = List.map (\i -> (3,i + 1)) rowThreeSpots
+        myLog         = Debug.log "rowOneArray" rowOneArray
+        myLog2        = Debug.log "rowTwoArray" rowTwoArray
+        myLog3        = Debug.log "rowThreeArray" rowThreeArray
+    in Array.fromList <| rowOneArray ++ rowTwoArray ++ rowThreeArray 
+
+
 uniformRowPicker : Board -> Generator (Int,Int)
 uniformRowPicker board = 
-      uniform (1,1) (getAvailableSpots board)
+      uniform (1,1) (Array.toList <| getAvailableSpots board)
 
 -- SUBSCRIPTIONS
 
