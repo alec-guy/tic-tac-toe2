@@ -155,29 +155,6 @@ evalBoard board = asum [evalRows board, evalColumns board, evalDiag board]
 
 -------------------------------------
 
-
- {-  
-getAvailableSpots : Board -> Array (Int,Int)
-getAvailableSpots board = 
-        let rowOneSpots   = loopingFunction 1 0 board.rowOne 
-            rowTwoSpots   = loopingFunction 2 0 board.rowTwo 
-            rowThreeSpots = loopingFunction 3 0 board.rowThree 
-            myLog         = Debug.log "avaialable spots" (getAvailableSpots board)
-        in Array.append (Array.append (rowOneSpots )( rowTwoSpots)) rowThreeSpots
-loopingFunction : Int -> Int -> Array String -> Array (Int,Int)
-loopingFunction i acc array = 
-       case Array.isEmpty array of 
-        True  -> Array.empty 
-        False -> case Array.get acc array of 
-                  Nothing   -> Array.empty
-                  (Just "") -> 
-                     Array.append 
-                     (Array.initialize 1 (\_ -> (i, acc + 1))) 
-                     (loopingFunction i (acc + 1) (Array.slice (1) (-1) array))
-                  (Just _) -> loopingFunction i (acc + 1) (Array.slice (1) (-1) array)
--} 
--- This was my code above, and I got angry so I asked the AI to fix it. 
--- So this is what the ai did. 
 getAvailableSpots : Board -> Array (Int,Int)
 getAvailableSpots board = 
     let 
