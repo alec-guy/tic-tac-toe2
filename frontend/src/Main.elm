@@ -47,9 +47,9 @@ initialBoard =
 updateBoard : Shape -> (Int,Int) -> Board -> Board 
 updateBoard s (r,c) board = 
      case r of 
-      1 ->  {board | rowOne = Array.set c (showShape s) (board.rowOne)}
-      2 -> {board | rowTwo = Array.set c (showShape s) (board.rowTwo)}
-      3 -> {board | rowThree = Array.set c (showShape s) (board.rowThree)}
+      1 ->  {board | rowOne = Array.set (c - 1) (showShape s) (board.rowOne)}
+      2 -> {board | rowTwo = Array.set (c - 1) (showShape s) (board.rowTwo)}
+      3 -> {board | rowThree = Array.set (c - 1) (showShape s) (board.rowThree)}
       _ -> board
 
 showShape : Shape -> String 
@@ -60,13 +60,13 @@ showShape s = case s of
 getCell : (Int, Int) -> Board -> String 
 getCell (r,c) board = 
    case r of 
-    1 -> case Array.get c board.rowOne of 
+    1 -> case Array.get (c - 1) board.rowOne of 
            Nothing -> ""
            (Just v) -> v
-    2 -> case Array.get c board.rowTwo of 
+    2 -> case Array.get (c - 1) board.rowTwo of 
            Nothing -> ""
            (Just v) -> v
-    3 -> case Array.get c board.rowThree of 
+    3 -> case Array.get (c - 1) board.rowThree of 
            Nothing -> ""
            (Just v) -> v
     _ -> ""
@@ -88,12 +88,15 @@ update msg model =
    (Chose shape) -> ({model | playingAs = Just shape}, Cmd.none)
    (ClickedMe t) -> case model.playingAs of 
                      Nothing -> (model,Cmd.none)
-                     (Just s) -> ({model | myBoard = updateBoard s t model.myBoard}
-                                 , generate NPCChoice (uniformRowPicker model.myBoard)
-                                 )
+                     (Just s) -> let newBoard = updateBoard s t model.myBoard 
+                                 in ({model | myBoard = newBoard}
+                                    ,generate NPCChoice (uniformRowPicker newBoard)
+                                    )
    (NPCChoice t) -> case model.playingAs of 
                      Nothing  -> (model,Cmd.none)
                      (Just s) -> ({model | myBoard = updateBoard (notShape s) t model.myBoard}, Cmd.none)
+                       
+    
 
 getAvailableSpots : Board -> List (Int,Int)
 getAvailableSpots board = 
@@ -154,8 +157,8 @@ viewBoard model =
                     ,div(cellAttributes ++ [onClick <| ClickedMe (2,2)])[text <| getCell (2,2) model.myBoard]
                     ,div(cellAttributes ++ [onClick <| ClickedMe (2,3)])[text <| getCell (2,3) model.myBoard]
                     ,div(cellAttributes ++ [onClick <| ClickedMe (3,1)])[text <| getCell (3,1) model.myBoard]
-                    ,div(cellAttributes ++ [onClick <| ClickedMe (3,2)]) [text <| getCell (3,2) model.myBoard]
-                    ,div(cellAttributes ++ [onClick <| ClickedMe (3,3)] )[text <| getCell (3,3) model.myBoard]
+                    ,div(cellAttributes ++ [onClick <| ClickedMe (3,2)])[text <| getCell (3,2) model.myBoard]
+                    ,div(cellAttributes ++ [onClick <| ClickedMe (3,3)])[text <| getCell (3,3) model.myBoard]
                     ]
 
 

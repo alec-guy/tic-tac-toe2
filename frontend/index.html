@@ -5629,7 +5629,7 @@ var $author$project$Main$updateBoard = F3(
 					{
 						rowOne: A3(
 							$elm$core$Array$set,
-							c,
+							c - 1,
 							$author$project$Main$showShape(s),
 							board.rowOne)
 					});
@@ -5639,7 +5639,7 @@ var $author$project$Main$updateBoard = F3(
 					{
 						rowTwo: A3(
 							$elm$core$Array$set,
-							c,
+							c - 1,
 							$author$project$Main$showShape(s),
 							board.rowTwo)
 					});
@@ -5649,7 +5649,7 @@ var $author$project$Main$updateBoard = F3(
 					{
 						rowThree: A3(
 							$elm$core$Array$set,
-							c,
+							c - 1,
 							$author$project$Main$showShape(s),
 							board.rowThree)
 					});
@@ -5676,16 +5676,15 @@ var $author$project$Main$update = F2(
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				} else {
 					var s = _v1.a;
+					var newBoard = A3($author$project$Main$updateBoard, s, t, model.myBoard);
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{
-								myBoard: A3($author$project$Main$updateBoard, s, t, model.myBoard)
-							}),
+							{myBoard: newBoard}),
 						A2(
 							$elm$random$Random$generate,
 							$author$project$Main$NPCChoice,
-							$author$project$Main$uniformRowPicker(model.myBoard)));
+							$author$project$Main$uniformRowPicker(newBoard)));
 				}
 			default:
 				var t = msg.a;
@@ -5830,7 +5829,7 @@ var $author$project$Main$getCell = F2(
 		var c = _v0.b;
 		switch (r) {
 			case 1:
-				var _v2 = A2($elm$core$Array$get, c, board.rowOne);
+				var _v2 = A2($elm$core$Array$get, c - 1, board.rowOne);
 				if (_v2.$ === 'Nothing') {
 					return '';
 				} else {
@@ -5838,7 +5837,7 @@ var $author$project$Main$getCell = F2(
 					return v;
 				}
 			case 2:
-				var _v3 = A2($elm$core$Array$get, c, board.rowTwo);
+				var _v3 = A2($elm$core$Array$get, c - 1, board.rowTwo);
 				if (_v3.$ === 'Nothing') {
 					return '';
 				} else {
@@ -5846,7 +5845,7 @@ var $author$project$Main$getCell = F2(
 					return v;
 				}
 			case 3:
-				var _v4 = A2($elm$core$Array$get, c, board.rowThree);
+				var _v4 = A2($elm$core$Array$get, c - 1, board.rowThree);
 				if (_v4.$ === 'Nothing') {
 					return '';
 				} else {
