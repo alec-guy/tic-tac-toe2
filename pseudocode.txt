@@ -1,0 +1,106 @@
+Pseudo code is starting because the last project I could not do it, and I created a mess. 
+Hopefully with this pseudo code, I can enjoy making pseudo code, and it will make coding feel more enjoyable , when stuff 
+actually works like I wanted it to. 
+
+so to start. 
+Back and and front end problems. 
+What parts do back end and front end deal with? 
+which ones do I start first with? 
+
+Render board 
+User clicks a screen that says , PICK SHAPE 
+user picks their shape. 
+user picks if they or the bot goes first 
+PICK choice . 
+
+GAME STARTS either               GAME STARTS either 
+USER GOING FIRST                 NPC GOING FIRST 
+|                                | 
+|                                | 
+|                                | 
+|                                | 
+
+As you can see, its like two different games. 
+
+User picks first spot            NPC PICKS FIRST SPOT send data back at every turn 
+NPC GOES                         USER GOES 
+USER PICKS NEXT                  NPC gOES
+NPC GOES                        USER GOES 
+UNTIL WINNER IS DECLARED        UNTIL WINNER IS DECLARED 
+
+se we have a data type like this 
+    PREGAME {
+            user : PlayerData
+            npc  : PlayerData 
+    }
+    PlayerData {shape : Shape, goesFirst : Bool, winner : Bool}
+   GAME {preGAME : GAME , board : Board, winner : PlayerData}
+   Board [Nothing, Nothing, SHAPE] 
+
+    }
+
+data Player = Data 
+            { shape :: String 
+            , goesFirst :: Bool 
+            , winner :: Bool 
+            }
+data PreGame = PreGame 
+             { user : Player 
+             , npc  : Player 
+             }
+data Board = Board 
+           {rowOne   : [String]
+           ,rowTwo   : [String]
+           ,rowThree : [String]
+           }
+data GAme {pareGame : PreGame, board : Board, winner : Bool}
+/
+/runGame 
+ wait for ELM code to give me PREGAME 
+ createGAME 
+ sendGame 
+ if hasWinner((evaluateGame(receiveGame))
+ then SEND 
+ else forever $ reveiveGame(sendGame(evaluateGame(receiveGame)))
+ sendGame(receiveGame)
+ evaluateGame(receiveGAme)
+ evaluateGame(receiveGAme)
+
+{
+"employees":["John", "Anna", "Peter"]
+}
+what data do we send back if we decide to do both back end and front end ?
+IT SEEMS LIKE inherently , this structure is front end or back end only  . 
+SENDING back the GAME to be evaluated has been a pain in the ass. 
+because its hard to do it . 
+FUCK THIS 
+lets think about Data types :) 
+evil data types. 
+but we have to think about how to send the JSON back and forth because that was cucking us so hard . 
+but lets try our best to make it simple so we don't have to learn complex JSON 
+and also because its better computatoinally. 
+
+ONE WAY 
+is we send the JSON TIC TAC TOE GRID from the back end. 
+that way what is rendered is an HTML represnetation of the grid itself. 
+then elm simply sends it back . 
+we could have a code 
+      TICTACTOE = TICTACTOE 
+                {string = "10002" 
+                 string = "100001010
+                }
+but that would be too complicated to render 
+thats why before we had something intuitive on the back end. but the json parsing made it a killer pain in the ass 
+
+
+board : [
+    ["","",""],
+    ["","",""],
+    ["","",""]
+], 
+   currentPlayer: "X" 
+   winner: null 
+you see how AI will desryroy us all because it came 
+up with this JSON representation and 
+I did not? 
+
