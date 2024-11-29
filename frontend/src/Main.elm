@@ -54,7 +54,7 @@ updateBoard s (r,c) board =
 
 showShape : Shape -> String 
 showShape s = case s of 
-               Circle -> "Circle"
+               Circle -> "O"
                X      -> "X"
 
 getCell : (Int, Int) -> Board -> String 
@@ -97,7 +97,30 @@ update msg model =
                      (Just s) -> ({model | myBoard = updateBoard (notShape s) t model.myBoard}, Cmd.none)
                        
     
+evaluateRow : List String -> Maybe Shape 
+evaluateRow row = 
+     case rowOne of 
+      ["X" "X" "X"]   -> Just X 
+      ["O", "O", "O"] -> Just Circle
+      _               -> Nothing 
+      
+evaluateRows : Board -> Maybe Shape 
+evaluateRows 
+evaluateColumns : Board -> Maybe Shape 
+evaluateColumns board = 
+    case (board.rowOne,board.rowTwo,board.rowThree) of 
+    (["X",_,_],["X",_,_],["X",_,_]) -> Just X 
+    ([_,"X",_],[_,"X",_],[_,"X",_]) -> Just X 
+    ([_,_,"X"],[_,_,"X"],[_,_,"X"]) -> Just X 
+    (["O",_,_],["O",_,_],["O",_,_]) -> Just Circle
+    ([_,"O",_],[_,"O",_],[_,"O",_]) -> Just Circle
+    ([_,_,"O"],[_,_,"O"],[_,_,"O"]) -> Just Circle 
+    _                               -> Nothing 
+evaluateDiagnols : Boar -> Maybe Shape 
 
+
+
+    
 getAvailableSpots : Board -> List (Int,Int)
 getAvailableSpots board = 
         let rowOneSpots  = loopingFunction 1 0 board.rowOne 
