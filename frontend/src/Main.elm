@@ -208,14 +208,14 @@ view : Model -> Html Msg
 view model =
   case model.playingAs of 
    Nothing -> chooseShape 
-   _       ->  div []
+   _       ->  div [style "background-color" red, style "position" "absolute", style "width" "100vw", style "height" "100vh"]
                [ h2 [] [ text "Tic-Tac-Two version2 by Alec Rodriguez"]
                , viewBoard model
                ]
 
 chooseShape : Html Msg 
 chooseShape = div 
-              []
+              [style "background-color" red, style "position" "absolute", style "width" "100vw", style "height" "100vh"]
               [h2 [] [text "Tic-Tac-Two version2 by Alec Rodriguez"]
               ,button [onClick <| Chose Circle] [text "Play as Circle"] 
               ,button [onClick <| Chose X] [text "Play as X"]
@@ -298,7 +298,6 @@ boardAttributes =
         ,style "margin" "0 auto"
         ,style "border" "2px solid black"
         ,style "padding" "10px"
-        ,style "background-color" peach
         ] 
 
 cellAttributes : List (Html.Attribute Msg)
