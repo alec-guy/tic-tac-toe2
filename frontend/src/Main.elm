@@ -9,7 +9,11 @@ import Json.Decode as D exposing (succeed)
 
 
 -- MAIN
-
+-- my colors 
+red : String 
+red = "#d20f39"
+peach : String 
+peach = "#fe540b"
 
 main =
   Browser.element
@@ -27,6 +31,7 @@ type alias Model =
                  {myBoard : Board
                  ,playingAs : Maybe Shape
                  ,winner : Maybe Shape 
+                 ,isDraw : Bool 
                  }
 
 
@@ -42,7 +47,7 @@ init : () -> (Model, Cmd Msg)
 init _ = (initialModel, Cmd.none)
 
 initialModel : Model 
-initialModel = {myBoard = initialBoard, playingAs = Nothing, winner = Nothing}
+initialModel = {myBoard = initialBoard, playingAs = Nothing, winner = Nothing, isDraw = False}
 initialBoard = 
            {rowOne =   fromList ["","",""]
            ,rowTwo =   fromList ["","",""]
@@ -92,20 +97,26 @@ update msg model =
    (Chose shape) -> ({initialModel | playingAs = Just shape}, Cmd.none)
    (ClickedMe t) -> case model.playingAs of 
                      Nothing -> (model,Cmd.none)
-                     (Just s) -> if (List.member t (Array.toList <| getAvailableSpots model.myBoard))
-                                 then let newBoard = updateBoard s t model.myBoard 
-                                          nextCmd  = case evalBoard newBoard of 
-                                           Nothing -> generate NPCChoice (uniformRowPicker newBoard)
-                                           Just _  -> Cmd.none
-                                      in ({model | myBoard = newBoard}, nextCmd)
-                                 else (model,Cmd.none)
+                     (Just s) -> let spotsList = Array.toList <| getAvailableSpots model.myBoard 
+                                 in case spotsList of 
+                                     [] -> ({model | isDraw = True}, Cmd.none)
+                                     _  -> if (List.member t spotsList)
+                                           then let newBoard = updateBoard s t model.myBoard 
+                                                    nextCmd  = case evalBoard newBoard of 
+                                                           Nothing -> generate NPCChoice (uniformRowPicker newBoard)
+                                                           Just _  -> Cmd.none
+                                                in ({model | myBoard = newBoard}, nextCmd)
+                                           else (model,Cmd.none)
    (NPCChoice t) -> case model.playingAs of 
                      Nothing -> (model, Cmd.none)
                      (Just s) -> 
-                        if List.member t (Array.toList <| getAvailableSpots model.myBoard)
-                        then let newBoard = updateBoard (notShape s) t model.myBoard
-                             in ({model | myBoard = newBoard}, Cmd.none)
-                        else (model, Cmd.none)
+                        let spotsList = Array.toList <| getAvailableSpots model.myBoard 
+                        in case spotsList of 
+                            [] -> ({model | isDraw = True}, Cmd.none)
+                            _  -> if List.member t (Array.toList <| getAvailableSpots model.myBoard)
+                                  then let newBoard = updateBoard (notShape s) t model.myBoard
+                                       in ({model | myBoard = newBoard}, Cmd.none)
+                                  else (model, Cmd.none)
    (NewGame) -> (initialModel , Cmd.none)
                        
 ---- 
@@ -175,7 +186,11 @@ getAvailableSpots board =
 
 uniformRowPicker : Board -> Generator (Int,Int)
 uniformRowPicker board = 
-      uniform (1,1) (Array.toList <| getAvailableSpots board)
+      let availableSpots = getAvailableSpots board 
+          guaranteed     = case Array.get 0 availableSpots of 
+                            Nothing -> (100,100)
+                            (Just h) -> h 
+      in uniform guaranteed (Array.toList availableSpots)
 
 -- SUBSCRIPTIONS
 
@@ -212,18 +227,40 @@ viewBoard model =
    Nothing       -> text "Choose your shape before you can play."
    _             -> case evalBoard model.myBoard of 
                      Nothing -> 
-                         div 
-                         boardAttributes 
-                         [div(cellAttributes ++ [onClick <| ClickedMe (1,1)])[text <| getCell (1,1) model.myBoard]
-                         ,div(cellAttributes ++ [onClick <| ClickedMe (1,2)])[text <| getCell (1,2) model.myBoard]
-                         ,div(cellAttributes ++ [onClick <| ClickedMe (1,3)])[text <| getCell (1,3) model.myBoard]
-                         ,div(cellAttributes ++ [onClick <| ClickedMe (2,1)])[text <| getCell (2,1) model.myBoard]
-                         ,div(cellAttributes ++ [onClick <| ClickedMe (2,2)])[text <| getCell (2,2) model.myBoard]
-                         ,div(cellAttributes ++ [onClick <| ClickedMe (2,3)])[text <| getCell (2,3) model.myBoard]
-                         ,div(cellAttributes ++ [onClick <| ClickedMe (3,1)])[text <| getCell (3,1) model.myBoard]
-                         ,div(cellAttributes ++ [onClick <| ClickedMe (3,2)])[text <| getCell (3,2) model.myBoard]
-                         ,div(cellAttributes ++ [onClick <| ClickedMe (3,3)])[text <| getCell (3,3) model.myBoard]
-                         ]
+                         case model.isDraw of 
+                           False -> div 
+                                    boardAttributes 
+                                    [div(cellAttributes ++ [onClick <| ClickedMe (1,1)])[text <| getCell (1,1) model.myBoard]
+                                    ,div(cellAttributes ++ [onClick <| ClickedMe (1,2)])[text <| getCell (1,2) model.myBoard]
+                                    ,div(cellAttributes ++ [onClick <| ClickedMe (1,3)])[text <| getCell (1,3) model.myBoard]
+                                    ,div(cellAttributes ++ [onClick <| ClickedMe (2,1)])[text <| getCell (2,1) model.myBoard]
+                                    ,div(cellAttributes ++ [onClick <| ClickedMe (2,2)])[text <| getCell (2,2) model.myBoard]
+                                    ,div(cellAttributes ++ [onClick <| ClickedMe (2,3)])[text <| getCell (2,3) model.myBoard]
+                                    ,div(cellAttributes ++ [onClick <| ClickedMe (3,1)])[text <| getCell (3,1) model.myBoard]
+                                    ,div(cellAttributes ++ [onClick <| ClickedMe (3,2)])[text <| getCell (3,2) model.myBoard]
+                                    ,div(cellAttributes ++ [onClick <| ClickedMe (3,3)])[text <| getCell (3,3) model.myBoard]
+                                    ]
+                           True -> div 
+                                   [] 
+                                   [h1 
+                                    [] 
+                                    [div [] [text <| "Game is a draw"]
+                                    ,div [] [button [onClick NewGame] [text "Play new game"]]
+                                    ]
+                                  ,div 
+                                   boardAttributes 
+                                   [div(cellAttributes)[text <| getCell (1,1) model.myBoard]
+                                   ,div(cellAttributes)[text <| getCell (1,2) model.myBoard]
+                                   ,div(cellAttributes)[text <| getCell (1,3) model.myBoard]
+                                   ,div(cellAttributes)[text <| getCell (2,1) model.myBoard]
+                                   ,div(cellAttributes )[text <| getCell (2,2) model.myBoard]
+                                   ,div(cellAttributes)[text <| getCell (2,3) model.myBoard]
+                                   ,div(cellAttributes)[text <| getCell (3,1) model.myBoard]
+                                   ,div(cellAttributes)[text <| getCell (3,2) model.myBoard]
+                                   ,div(cellAttributes)[text <| getCell (3,3) model.myBoard]
+                                   ]
+                                   ]
+
                      (Just shape) -> 
                            div 
                            [] 
@@ -261,6 +298,7 @@ boardAttributes =
         ,style "margin" "0 auto"
         ,style "border" "2px solid black"
         ,style "padding" "10px"
+        ,style "background-color" peach
         ] 
 
 cellAttributes : List (Html.Attribute Msg)
